@@ -41,7 +41,7 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     restart: "no"
     ports:
-      - 8081:8081
+      - 8081:80
     environment:
       - PMA_HOST=omeka-db
     depends_on:

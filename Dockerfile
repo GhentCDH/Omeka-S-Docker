@@ -29,8 +29,8 @@ RUN apt-get -qq update \
 RUN a2dismod -f autoindex
 
 # Configure PHP
-RUN phpdismod pdo_sqlite tidy gmp soap redis \ 
-    && phpaddmod solr imagick intl iconv pdo pdo_mysql mysqli gd
+# RUN phpdismod pdo_sqlite tidy gmp soap redis 
+RUN phpaddmod solr imagick intl iconv pdo pdo_mysql mysqli gd
 
 COPY ./config/prod/php-defaults.ini /etc/php/$PHP_VERSION/fpm/conf.d/99-defaults.ini
 
