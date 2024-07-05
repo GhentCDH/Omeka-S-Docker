@@ -3,6 +3,7 @@ name: Omeka-S Docker Image CI
 on:
   release:
     types: [ published ]
+  workflow_dispatch: # For being able to run the action manually
 
 jobs:
   build-and-push-docker-image:
