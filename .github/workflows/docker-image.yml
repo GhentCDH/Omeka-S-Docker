@@ -1,0 +1,43 @@
+name: Omeka-S Docker Image CI
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  build-and-push-docker-image:
+    runs-on: ubuntu-latest
+    name: pushing job to Docker Hub
+    # set all the versions of php and omeka-s we will build an image of to push on docker hub
+    strategy:
+      matrix:
+        php-version: [8.1, 8.2, 8.3]
+        omeka-s-version: ["4.0.4", "4.1.0", "4.1.1"]
+        # to specify combinations please read include/exlude 
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrixinclude
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrixexclude
+        
+    steps:
+        # for access to repository (given to workflow)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      -  name: Login to Docker Hub
+         uses: docker/login-action@v3
+         with:
+           username: ${{ secrets.DOCKERHUB_USERNAME }}
+           password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+        # Docker builder needed to be able to build the images
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+        # builds and pushes the images for each version specified in matrix
+      - name: Build and push the image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/omeka-s-docker:php-v${{ matrix.php-version }}-omeka-s-v${{ matrix.omeka-s-version }}
+          build-args: |
+            PHP_VERSION=${{ matrix.php-version }}
+            OMEKA_S_VERSION=${{ matrix.omeka-s-version }}
