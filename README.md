@@ -26,6 +26,10 @@ cp example.env .env
 Update the `.env` file with your specific configuration:
 
 ```sh
+# Omeka-S & PHP version
+OMEKA_S_VERSION=4.1.1
+PHP_VERSION=8.2
+
 # MySQL/MariaDB configuration
 MYSQL_ROOT_PASSWORD=your_root_password
 MYSQL_DATABASE=omeka_db
@@ -44,28 +48,3 @@ HOST_NAME=example.com
 ```
 
 These environment variables are used to set up the necessary configuration for the Docker container. The `database.ini` config file is automatically generated at startup using the `build_omeka_config.sh` script based on these values.
-
-## Customizing Build Arguments
-
-You can specify the PHP and Omeka-S versions in the `docker-compose.yaml` file. The default versions are:
-
-```sh
-PHP_VERSION=8.1
-OMEKA_S_VERSION="4.0.4"
-```
-
-### Note
-
-Database updates might be required for newer versions of Omeka-S.
-
-To build with custom versions, modify the `docker-compose.yaml` file as follows:
-
-```yaml
-args:
-  OMEKA_S_VERSION: "<your_version>"
-  PHP_VERSION: <your_version>
-```
-
-Replace `<your_version>` with the desired versions of PHP and Omeka-S.
-
-By following these steps, you can configure and customize your Omeka-S Docker environment efficiently.
