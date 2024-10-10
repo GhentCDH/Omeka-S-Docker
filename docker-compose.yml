@@ -40,3 +40,12 @@ services:
       - PMA_HOST=omeka-db
     depends_on:
       - omeka-db
+
+  solr:
+    image: bitnami/solr:9
+    ports:
+     - "8983:8983"
+    volumes:
+      - ./data/solr:/var/solr
+    environment:
+      - SOLR_CORES=omeka
