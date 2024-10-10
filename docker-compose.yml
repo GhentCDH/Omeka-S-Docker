@@ -13,10 +13,10 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./files:/var/www/omeka-s/files
-      - ./logs:/var/www/omeka-s/logs
-      - ./modules:/var/www/omeka-s/modules
-      - ./themes:/var/www/omeka-s/themes   
+      - ./omeka/files:/var/www/omeka-s/files
+      - ./omeka/logs:/var/www/omeka-s/logs
+      - ./omeka/modules:/var/www/omeka-s/modules
+      - ./omeka/themes:/var/www/omeka-s/themes
     depends_on:
       - omeka-db
 
