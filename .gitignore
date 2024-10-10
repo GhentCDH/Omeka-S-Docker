@@ -1,19 +1,17 @@
 .env
+.env.*
 
 # Exclude example.env
 !example.env
 database.ini
 
 # exclude everything
-files/*
-logs/*
-modules/*
-themes/*
-db/*
+omeka/*
+data/*
 
 # exception to the rule
-!files/.gitkeep
-!logs/.gitkeep
-!modules/.gitkeep
-!themes/.gitkeep
-!db/.gitkeep
+!.gitkeep
+!omeka/files/.gitkeep
+!omeka/logs/.gitkeep
+!omeka/files/.gitkeep
+!omeka/files/.gitkeep
