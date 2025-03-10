@@ -1,50 +1,48 @@
-version: "3"
-
 services:
-  omeka-web:
+  web:
     build:
       context: .
       args:
-        OMEKA_S_VERSION : ${OMEKA_S_VERSION:-"4.1.1"}
-        PHP_VERSION : ${PHP_VERSION:-"8.2"}
+        OMEKA_S_VERSION: ${OMEKA_S_VERSION:-"4.1.1"}
+        PHP_VERSION: ${PHP_VERSION:-"8.2"}
     restart: "no"
     env_file: ".env"
-    
     ports:
-      - 8080:80
+      - ${OMEKA_S_PORT:-8080}:80
     volumes:
       - ./omeka/files:/var/www/omeka-s/files
       - ./omeka/logs:/var/www/omeka-s/logs
       - ./omeka/modules:/var/www/omeka-s/modules
       - ./omeka/themes:/var/www/omeka-s/themes
     depends_on:
-      - omeka-db
+      - db
 
-  omeka-db:
-    image: mariadb:10.6
+  db:
+    image: mariadb:${MARIADB_VERSION:-11.4}
     restart: "no"
     volumes:
       - ./data/db:/var/lib/mysql
+      - ./data/db-init:/docker-entrypoint-initdb.d
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
-  omeka-db-admin:
+  phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     restart: "no"
     ports:
-      - 8081:80
+      - ${PHPMYADMIN_PORT:-8081}:80
     environment:
-      - PMA_HOST=omeka-db
+      - PMA_HOST=db
     depends_on:
-      - omeka-db
+      - db
 
   solr:
-    image: bitnami/solr:9
+    image: bitnami/solr:${SOLR_VERSION:-9}
     ports:
-     - "8983:8983"
+      - ${SOLR_PORT:-8983}:8983
     volumes:
       - ./data/solr:/var/solr
     environment:
