@@ -7,7 +7,9 @@ database.ini
 
 # exclude everything
 omeka/*
-data/*
+data/db/*
+data/solr/*
+data/db-init/*
 
 # exception to the rule
 !.gitkeep
