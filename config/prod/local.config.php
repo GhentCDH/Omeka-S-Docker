@@ -1,8 +1,8 @@
 <?php
 return [
     'logger' => [
-        'log' => false,
-        // 'priority' => \Laminas\Log\Logger::NOTICE,
+        'log' => true,
+        'priority' => \Laminas\Log\Logger::NOTICE,
     ],
     'http_client' => [
         'sslcapath' => null,
