@@ -8,7 +8,7 @@ services:
     restart: "no"
     env_file: ".env"
     ports:
-      - ${OMEKA_S_PORT:-8080}:80
+      - ${EXPOSED_PORT_OMEKA:-8080}:80
     volumes:
       - ./omeka/files:/var/www/omeka-s/files
       - ./omeka/logs:/var/www/omeka-s/logs
@@ -34,7 +34,7 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     restart: "no"
     ports:
-      - ${PHPMYADMIN_PORT:-8081}:80
+      - ${EXPOSED_PORT_PHPMYADMIN:-8081}:80
     environment:
       - PMA_HOST=db
     depends_on:
@@ -42,8 +42,6 @@ services:
 
   solr:
     image: bitnami/solr:${SOLR_VERSION:-9}
-    ports:
-      - ${SOLR_PORT:-8983}:8983
     volumes:
       - ./data/solr:/var/solr
     environment:
