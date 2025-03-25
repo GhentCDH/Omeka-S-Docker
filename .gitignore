@@ -18,6 +18,7 @@ database.ini
 /data/solr/*
 /data/db/*
 /data/db-init/*
+/data/apache/*
 
 # exceptions to the rule
 !.gitkeep
@@ -29,3 +30,4 @@ database.ini
 !data/solr/.gitkeep
 !data/db/.gitkeep
 !data/db-init/.gitkeep
+!data/apache/.gitkeep
