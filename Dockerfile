@@ -5,6 +5,8 @@ FROM webdevops/php-apache:${PHP_VERSION}
 # ==========================================================
 
 ENV WEB_DOCUMENT_ROOT="/var/www/omeka-s"
+ENV PHP_DISMOD="pdo_sqlite,tidy,gmp,soap,redis,ioncube,mongodb,opentelemetry,excimer,protobuf,pgsql,ffi,amqp"
+
 ENV PHP_MEMORY_LIMIT="512M"
 ENV PHP_POST_MAX_SIZE="220M"
 ENV PHP_UPLOAD_MAX_FILESIZE="220M"
