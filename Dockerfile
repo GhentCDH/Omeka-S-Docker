@@ -52,8 +52,7 @@ COPY ./config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
 
 # Add Omeka-S cli tool
 RUN git clone https://github.com/GhentCDH/Omeka-S-Cli.git /opt/omeka-s-cli && \
-    composer install --working-dir=/opt/omeka-s-cli && \
-    ln -s /opt/omeka-s-cli/bin/omeka-s-cli /usr/local/bin/omeka-s-cli
+    ln -s /opt/omeka-s-cli/bin/omeka-s-cli.phar /usr/local/bin/omeka-s-cli
 
 # ==========================================================
 
