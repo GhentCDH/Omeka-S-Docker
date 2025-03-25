@@ -43,6 +43,6 @@ services:
   solr:
     image: bitnami/solr:${SOLR_VERSION:-9}
     volumes:
-      - ./data/solr:/var/solr
+      - ./data/solr:/bitnami
     environment:
       - SOLR_CORES=omeka
