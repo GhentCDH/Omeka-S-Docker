@@ -5,6 +5,22 @@ FROM webdevops/php-apache:${PHP_VERSION}
 # ==========================================================
 
 ENV WEB_DOCUMENT_ROOT="/var/www/omeka-s"
+ENV PHP_MEMORY_LIMIT="512M"
+ENV PHP_POST_MAX_SIZE="220M"
+ENV PHP_UPLOAD_MAX_FILESIZE="220M"
+
+ENV php.expose_php="Off"
+ENV php.max_input_vars=4000
+
+# Enable opcache
+ENV php.opcache.enable=1
+ENV php.opcache.memory_consumption=256
+ENV php.opcache.interned_strings_buffer=64
+ENV php.opcache.max_accelerated_files=50000
+ENV php.opcache.max_wasted_percentage=15
+ENV php.opcache.save_comments=1
+ENV php.opcache.revalidate_freq=2
+ENV php.opcache.validate_timestamps=1
 
 # ==========================================================
 
@@ -27,11 +43,7 @@ RUN apt-get -qq update && \
     apt-get autoclean
 
 # Configure apache
-
 RUN a2dismod -f autoindex
-
-# Override default PHP configuration
-COPY ./config/prod/php-defaults.ini /opt/docker/etc/php/php.ini
 
 # Override default ImageMagick policy
 COPY ./config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
