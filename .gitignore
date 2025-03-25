@@ -1,18 +1,15 @@
 .env
 .env.*
 
-# Exclude example.env
+compose.override.yaml
+compose.dev.override.yaml
+
 !example.env
 database.ini
 
 # exclude everything
-omeka/files/*
-omeka/logs/*
-omeka/modules/*
-omeka/themes/*
-data/db/*
-data/solr/*
-data/db-init/*
+omeka/*
+data/*
 
 # exception to the rule
 !.gitkeep
