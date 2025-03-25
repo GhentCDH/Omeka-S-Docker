@@ -1,6 +1,6 @@
 ARG PHP_VERSION=8.1
 
-FROM webdevops/php-apache:${PHP_VERSION}
+FROM webdevops/php-apache:${PHP_VERSION} AS base
 
 # ==========================================================
 
@@ -27,7 +27,6 @@ ENV php.opcache.validate_timestamps=1
 # ==========================================================
 
 # Install dependencies
-
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -qq update && \
     apt-get -qq -f --no-install-recommends install \
@@ -56,7 +55,7 @@ RUN git clone https://github.com/GhentCDH/Omeka-S-Cli.git /opt/omeka-s-cli && \
 
 # ==========================================================
 
-ARG OMEKA_S_VERSION="4.0.4"
+ARG OMEKA_S_VERSION="4.1.1"
 
 # Download Omeka-S release
 # user "application" created by webdevops/php-apache
@@ -75,4 +74,3 @@ COPY --chmod=755 ./config/build_omeka_config.sh /entrypoint.d/build_omeka_config
 
 # Convert line endings to Unix (For Windows compatibility)
 RUN dos2unix /entrypoint.d/build_omeka_config.sh
-
