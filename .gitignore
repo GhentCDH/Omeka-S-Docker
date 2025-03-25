@@ -7,11 +7,19 @@ compose.dev.override.yaml
 !example.env
 database.ini
 
-# exclude everything
-omeka/*
-data/*
+# exclude omeka folders
+/omeka/files/*
+/omeka/logs/*
+/omeka/themes/*
+/omeka/modules/*
+/omeka/config/*
 
-# exception to the rule
+# exclude data folders
+/data/solr/*
+/data/db/*
+/data/db-init/*
+
+# exceptions to the rule
 !.gitkeep
 !omeka/files/.gitkeep
 !omeka/logs/.gitkeep
