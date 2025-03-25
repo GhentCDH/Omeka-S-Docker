@@ -15,8 +15,9 @@ data/*
 !.gitkeep
 !omeka/files/.gitkeep
 !omeka/logs/.gitkeep
-!omeka/files/.gitkeep
-!omeka/files/.gitkeep
+!omeka/themes/.gitkeep
+!omeka/modules/.gitkeep
+!omeka/config/.gitkeep
 !data/solr/.gitkeep
 !data/db/.gitkeep
 !data/db-init/.gitkeep
