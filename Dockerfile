@@ -47,7 +47,7 @@ RUN apt-get -qq update && \
 RUN a2dismod -f autoindex
 
 # Override default ImageMagick policy
-COPY ./config/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
+COPY ./build/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
 
 # Add Omeka-S cli tool
 RUN git clone https://github.com/GhentCDH/Omeka-S-Cli.git /opt/omeka-s-cli && \
@@ -65,12 +65,12 @@ RUN wget --no-verbose "https://github.com/omeka/omeka-s/releases/download/v${OME
     chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
 
 # Set default configuration
-COPY ./config/prod/.htaccess /var/www/omeka-s/
-COPY ./config/prod/local.config.php /var/www/omeka-s/config/
+COPY ./build/prod/.htaccess /var/www/omeka-s/
+COPY ./build/prod/local.config.php /var/www/omeka-s/config/
 
 # Add boot script to generate /var/www/omeka-s/config/database.ini based on ENV
 # see: https://github.com/just-containers/s6-overlay
-COPY --chmod=755 ./config/build_omeka_config.sh /entrypoint.d/build_omeka_config.sh
+COPY --chmod=755 ./build/build_omeka_config.sh /entrypoint.d/build_omeka_config.sh
 
 # Convert line endings to Unix (For Windows compatibility)
 RUN dos2unix /entrypoint.d/build_omeka_config.sh
