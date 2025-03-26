@@ -14,7 +14,6 @@ services:
       - ./omeka/logs:/var/www/omeka-s/logs
       - ./omeka/modules:/var/www/omeka-s/modules
       - ./omeka/themes:/var/www/omeka-s/themes
-      - ./omeka/config:/var/www/omeka-s/config
     depends_on:
       - db
 
