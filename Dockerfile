@@ -31,17 +31,21 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -qq update && \
     apt-get -qq -f --no-install-recommends install \
         wget \
+        curl \
         unzip \
+        nano \
         imagemagick \
         ghostscript \
         ffmpeg \
-        libvips \
+        libvips-tools \
         dos2unix \
         libxml2 libxml2-dev libcurl4-openssl-dev libmagickwand-dev \
         git && \
-        pecl install solr && \
     apt-get clean && \
     apt-get autoclean
+
+# Add php exten
+RUN docker-php-ext-install dba
 
 # Configure apache
 RUN a2dismod -f autoindex
