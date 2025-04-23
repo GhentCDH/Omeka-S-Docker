@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.1
+ARG PHP_VERSION=8.2
 
 FROM webdevops/php-apache:${PHP_VERSION} AS base
 
@@ -30,16 +30,13 @@ ENV php.opcache.validate_timestamps=1
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -qq update && \
     apt-get -qq -f --no-install-recommends install \
-        wget \
         unzip \
         imagemagick \
         ghostscript \
         ffmpeg \
         libvips \
-        dos2unix \
         libxml2 libxml2-dev libcurl4-openssl-dev libmagickwand-dev \
         git && \
-        pecl install solr && \
     apt-get clean && \
     apt-get autoclean
 
@@ -49,28 +46,69 @@ RUN a2dismod -f autoindex
 # Override default ImageMagick policy
 COPY ./build/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
 
-# Add Omeka-S cli tool
-RUN git clone https://github.com/GhentCDH/Omeka-S-Cli.git /opt/omeka-s-cli && \
-    ln -s /opt/omeka-s-cli/bin/omeka-s-cli.phar /usr/local/bin/omeka-s-cli
+# Install Omeka S cli tool
+RUN curl -Lo /usr/local/bin/omeka-s-cli https://github.com/GhentCDH/Omeka-S-Cli/releases/latest/download/omeka-s-cli.phar && \
+    chmod 755 /usr/local/bin/omeka-s-cli
 
+# ==========================================================
+# Download Omeka S
 # ==========================================================
 
 ARG OMEKA_S_VERSION="4.1.1"
 
-# Download Omeka-S release
+# Download Omeka S release
 # user "application" created by webdevops/php-apache
-RUN wget --no-verbose "https://github.com/omeka/omeka-s/releases/download/v${OMEKA_S_VERSION}/omeka-s-${OMEKA_S_VERSION}.zip" -O /var/www/omeka-s.zip && \
+RUN curl -Lo /var/www/omeka-s.zip "https://github.com/omeka/omeka-s/releases/download/v${OMEKA_S_VERSION}/omeka-s-${OMEKA_S_VERSION}.zip" && \
     unzip -q /var/www/omeka-s.zip -d /var/www/ && \
     rm /var/www/omeka-s.zip && \
-    chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
+    rm -rf /var/www/html
 
-# Set default configuration
-COPY ./build/prod/.htaccess /var/www/omeka-s/
-COPY ./build/prod/local.config.php /var/www/omeka-s/config/
+# Create a single volume for config, files, themes, modules and logs
+RUN mkdir -p /volume/config && \
+    mkdir -p /volume/files && \
+    mkdir -p /volume/themes && \
+    mkdir -p /volume/modules && \
+    mkdir -p /volume/logs
 
-# Add boot script to generate /var/www/omeka-s/config/database.ini based on ENV
-# see: https://github.com/just-containers/s6-overlay
-COPY --chmod=755 ./build/build_omeka_config.sh /entrypoint.d/build_omeka_config.sh
+# Add symbolic links to the volume
+RUN rm -Rf /var/www/omeka-s/config && \
+    ln -s /volume/config /var/www/omeka-s/config && \
+    rm -Rf /var/www/omeka-s/files && \
+    ln -s /volume/files /var/www/omeka-s/files && \
+    rm -Rf /var/www/omeka-s/modules && \
+    ln -s /volume/modules /var/www/omeka-s/modules && \
+    rm -Rf /var/www/omeka-s/themes && \
+    ln -s /volume/themes /var/www/omeka-s/themes && \
+    rm -Rf /var/www/omeka-s/logs && \
+    ln -s /volume/logs /var/www/omeka-s/logs
 
-# Convert line endings to Unix (For Windows compatibility)
-RUN dos2unix /entrypoint.d/build_omeka_config.sh
+# Copy .htaccess
+COPY --chmod=755 ./build/prod/.htaccess /var/www/omeka-s/.htaccess
+
+# Copy default configuration
+RUN mkdir /dist
+COPY --chmod=755 ./build/prod/local.config.php /var/www/omeka-s/config
+
+# Set permissions
+RUN chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
+
+# ==========================================================
+# Add entrypoint scripts
+# ==========================================================
+
+## todo: Bundle modules
+
+## todo: Bundle themes
+
+## Add boot script to generate config (database.ini, local.config.php)
+COPY --chmod=755 ./build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh
+
+## Add boot script to automatically download modules
+COPY --chmod=755 ./build/download_omeka_modules.sh /entrypoint.d/60-download_omeka_modules.sh
+
+## Add boot script to automatically download themes
+COPY --chmod=755 ./build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh
+
+## Add boot script to set file & folder permissions
+COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-download_omeka_themes.sh
+
