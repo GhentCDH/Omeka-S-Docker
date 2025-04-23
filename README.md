@@ -15,36 +15,90 @@ Once started, you can access the Omeka-S installation at [http://localhost:8080]
 
 ## Configuration
 
-### Setting Up Environment Variables
+### Setting Up Environment Variables for Omeka
 
-First, copy the `example.env` file to `.env` and update the values as needed:
+First, copy the `example.env` file to `.env` and update the values as needed.
 
-```sh
-cp example.env .env
+| Variable                | Description                                                       | Default |
+| ----------------------- | ----------------------------------------------------------------- | ------- |
+| OMEKA_S_VERSION         | Omeka S Version                                                   | 4.1.1   |
+| PHP_VERSION             | PHP Version                                                       | 8.2     |
+| MYSQL_DATABASE          | Database name                                                     |         |
+| MYSQL_USER              | Database user                                                     |         |
+| MYSQL_PASSWORD          | Database password                                                 |         |
+| MYSQL_HOST              | Database host                                                     | db      |
+| SMTP_HOST               | SMTP host                                                         |         |
+| SMTP_PORT               | 25, 465 for 'ssl', and 587 for 'tls'                              | 25      |
+| SMTP_CONNECTION_TYPE    | 'null', 'ssl' or 'tls'                                            | none    |
+| SMTP_USER               |                                                                   |         |
+| SMTP_PASSWORD           |                                                                   |         |
+| OMEKA_S_MODULES         | A list of Omeka S modules/urls                                    |         |
+| OMEKA_S_THEMES          | A list of Omeka S themes/urls                                     |         |
+| OMEKA_S_ALLOW_EASYADMIN | Set themes/modules folder writable for EasyAdmin module (value 1) | 0       |
+
+These environment variables are used to set up the necessary configuration for the Omeka container. The `database.ini` config file is automatically generated at startup using the `init_omeka_config.sh` script based on these values.
+
+#### Setting Up Environment Variables for database container (optional)
+
+| Variable            | Description                                                    | Default |
+| ------------------- | -------------------------------------------------------------- | ------- |
+| MYSQL_ROOT_PASSWORD | Database root password |         |
+
+## Download Modules at Startup
+
+You can automatically download modules at startup by setting the OMEKA_S_MODULES environment variable. This should contain one or more:
+
+- module identifiers (dirnames) as found in https://omeka.org/add-ons/json/s_module.json. You specify a specific version with the syntax `module:version`.
+- urls pointing to ZIP releases of valid Omeka S modules.
+
+The modules will be downloaded to the `modules` directory. Existing modules will not be overwritten.
+
+### Example
+
+In your .env file:
+
+```
+OMEKA_S_MODULES="Common Log EasyAdmin:3.4.38"
 ```
 
-Update the `.env` file with your specific configuration:
+In your compose.override.yaml file:
 
-```sh
-# Omeka-S & PHP version
-OMEKA_S_VERSION=4.1.1
-PHP_VERSION=8.2
+```
+services:
+  omeka:
+    environment:
+      OMEKA_S_MODULES: |
+        Common
+        Log
+        EasyAdmin:3.4.38
 
-# MySQL/MariaDB configuration
-MYSQL_ROOT_PASSWORD=your_root_password
-MYSQL_DATABASE=omeka_db
-MYSQL_USER=omeka_usr
-MYSQL_PASSWORD=your_password
-MYSQL_HOST=omeka-db
-
-# Omeka-S SMTP configuration
-# For more details, see: https://docs.laminas.dev/laminas-mail/transport/smtp-options/
-EMAIL_HOST=smtp.example.com
-EMAIL_PORT=587
-EMAIL_USER=your_email_user
-EMAIL_PASSWORD=your_email_password
-EMAIL_CONNECTION_TYPE=tls
-HOST_NAME=example.com
 ```
 
-These environment variables are used to set up the necessary configuration for the Docker container. The `database.ini` config file is automatically generated at startup using the `build_omeka_config.sh` script based on these values.
+## Download Themes at Startup
+
+You can automatically download themes at container startup by setting the OMEKA_S_THEMES environment variable. This should contain one or more:
+
+- theme identifiers (dirnames) as found in https://omeka.org/add-ons/json/s_theme.json. You specify a specific version with the syntax `theme:version`.
+- urls pointing to ZIP releases of valid Omeka S themes.
+
+The themes will be downloaded to the `themes` directory. Existing themes will not be overwritten.
+
+### Example
+
+In your .env file:
+
+```
+OMEKA_S_THEMES="default Freedom:1.0.6"
+```
+
+In your compose.override.yaml file:
+
+```
+services:
+  omeka:
+    environment:
+      OMEKA_S_THEMES: |
+        default
+        Freedom:1.0.6
+```
+
