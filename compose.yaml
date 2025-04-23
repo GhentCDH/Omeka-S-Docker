@@ -1,5 +1,5 @@
 services:
-  web:
+  omeka:
     build:
       context: .
       args:
@@ -8,12 +8,9 @@ services:
     restart: "no"
     env_file: ".env"
     ports:
-      - ${EXPOSED_PORT_OMEKA:-8080}:80
+      - ${OMEKA_S_EXPOSED_PORT:-8080}:80
     volumes:
-      - ./omeka/files:/var/www/omeka-s/files
-      - ./omeka/logs:/var/www/omeka-s/logs
-      - ./omeka/modules:/var/www/omeka-s/modules
-      - ./omeka/themes:/var/www/omeka-s/themes
+      - omeka:/volume
     depends_on:
       - db
 
@@ -33,7 +30,7 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     restart: "no"
     ports:
-      - ${EXPOSED_PORT_PHPMYADMIN:-8081}:80
+      - ${PHPMYADMIN_EXPOSED_PORT:-8081}:80
     environment:
       - PMA_HOST=db
     depends_on:
@@ -45,3 +42,6 @@ services:
       - ./data/solr:/bitnami
     environment:
       - SOLR_CORES=omeka
+
+volumes:
+  omeka:
