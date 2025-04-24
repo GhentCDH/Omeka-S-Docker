@@ -19,22 +19,22 @@ Once started, you can access the Omeka-S installation at [http://localhost:8080]
 
 First, copy the `example.env` file to `.env` and update the values as needed.
 
-| Variable                | Description                                                       | Default |
-| ----------------------- | ----------------------------------------------------------------- | ------- |
-| OMEKA_S_VERSION         | Omeka S Version                                                   | 4.1.1   |
-| PHP_VERSION             | PHP Version                                                       | 8.2     |
-| MYSQL_DATABASE          | Database name                                                     |         |
-| MYSQL_USER              | Database user                                                     |         |
-| MYSQL_PASSWORD          | Database password                                                 |         |
-| MYSQL_HOST              | Database host                                                     | db      |
-| SMTP_HOST               | SMTP host                                                         |         |
-| SMTP_PORT               | 25, 465 for 'ssl', and 587 for 'tls'                              | 25      |
-| SMTP_CONNECTION_TYPE    | 'null', 'ssl' or 'tls'                                            | none    |
-| SMTP_USER               |                                                                   |         |
-| SMTP_PASSWORD           |                                                                   |         |
-| OMEKA_S_MODULES         | A list of Omeka S modules/urls                                    |         |
-| OMEKA_S_THEMES          | A list of Omeka S themes/urls                                     |         |
-| OMEKA_S_ALLOW_EASYADMIN | Set themes/modules folder writable for EasyAdmin module (value 1) | 0       |
+| Variable                 | Description                                                        | Default |
+| ------------------------ | ------------------------------------------------------------------ | ------- |
+| OMEKA_S_VERSION          | Omeka S Version                                                    | 4.1.1   |
+| PHP_VERSION              | PHP Version                                                        | 8.2     |
+| MYSQL_DATABASE           | Database name                                                      |         |
+| MYSQL_USER               | Database user                                                      |         |
+| MYSQL_PASSWORD           | Database password                                                  |         |
+| MYSQL_HOST               | Database host                                                      | db      |
+| SMTP_HOST                | SMTP host                                                          |         |
+| SMTP_PORT                | 25, 465 for 'ssl', and 587 for 'tls'                               | 25      |
+| SMTP_CONNECTION_TYPE     | 'null', 'ssl' or 'tls'                                             | none    |
+| SMTP_USER                |                                                                    |         |
+| SMTP_PASSWORD            |                                                                    |         |
+| OMEKA_S_MODULES          | A list of Omeka S modules/urls                                     |         |
+| OMEKA_S_THEMES           | A list of Omeka S themes/urls                                      |         |
+| OMEKA_S_ALLOW_EASY_ADMIN | Set value to 1 to allow EasyAdmin module to install themes/modules | 0       |
 
 These environment variables are used to set up the necessary configuration for the Omeka container. The `database.ini` config file is automatically generated at startup using the `init_omeka_config.sh` script based on these values.
 
