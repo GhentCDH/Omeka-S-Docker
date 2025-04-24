@@ -1,33 +1,17 @@
 .env
 .env.*
 
+/_temp
+
 compose.override.yaml
 compose.dev.override.yaml
 
 !example.env
 database.ini
 
-# exclude omeka folders
-/omeka/files/*
-/omeka/logs/*
-/omeka/themes/*
-/omeka/modules/*
-/omeka/config/*
-
 # exclude data folders
-/data/solr/*
-/data/db/*
 /data/db-init/*
-/data/apache/*
 
 # exceptions to the rule
 !.gitkeep
-!omeka/files/.gitkeep
-!omeka/logs/.gitkeep
-!omeka/themes/.gitkeep
-!omeka/modules/.gitkeep
-!omeka/config/.gitkeep
-!data/solr/.gitkeep
-!data/db/.gitkeep
 !data/db-init/.gitkeep
-!data/apache/.gitkeep
