@@ -30,17 +30,22 @@ ENV php.opcache.validate_timestamps=1
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -qq update && \
     apt-get -qq -f --no-install-recommends install \
+        curl \
         unzip \
+        nano \
         imagemagick \
         ghostscript \
         ffmpeg \
-        libvips \
+        libvips-tools \
         libxml2 libxml2-dev libcurl4-openssl-dev libmagickwand-dev \
         git && \
     apt-get clean && \
     apt-get autoclean
 
-# Configure apache
+# Add extra php dba extension
+RUN docker-php-ext-install dba
+
+# Disable apache2 modules
 RUN a2dismod -f autoindex
 
 # Override default ImageMagick policy
@@ -111,4 +116,3 @@ COPY --chmod=755 ./build/download_omeka_themes.sh /entrypoint.d/61-download_omek
 
 ## Add boot script to set file & folder permissions
 COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-download_omeka_themes.sh
-
