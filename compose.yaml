@@ -18,7 +18,7 @@ services:
     image: mariadb:${MARIADB_VERSION:-11.4}
     restart: "no"
     volumes:
-      - ./data/db:/var/lib/mysql
+      - db:/var/lib/mysql
       - ./data/db-init:/docker-entrypoint-initdb.d
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -39,9 +39,12 @@ services:
   solr:
     image: bitnami/solr:${SOLR_VERSION:-9}
     volumes:
-      - ./data/solr:/bitnami
+      - solr:/bitnami
     environment:
       - SOLR_CORES=omeka
 
 volumes:
   omeka:
+  db:
+  solr:
+      
