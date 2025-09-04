@@ -60,6 +60,8 @@ RUN curl -Lo /usr/local/bin/omeka-s-cli https://github.com/GhentCDH/Omeka-S-Cli/
 # ==========================================================
 
 ARG OMEKA_S_VERSION="4.1.1"
+ARG OMEKA_S_MODULES=""
+ARG OMEKA_S_THEMES=""
 
 # Download Omeka S release
 # user "application" created by webdevops/php-apache
@@ -88,11 +90,10 @@ RUN rm -Rf /var/www/omeka-s/config && \
     ln -s /volume/logs /var/www/omeka-s/logs
 
 # Copy .htaccess
-COPY --chmod=755 ./build/prod/.htaccess /var/www/omeka-s/.htaccess
+COPY --chmod=755 ./build/.htaccess /var/www/omeka-s/.htaccess
 
 # Copy default configuration
-RUN mkdir /dist
-COPY --chmod=755 ./build/prod/local.config.php /var/www/omeka-s/config
+COPY --chmod=755 ./build/local.config.php /var/www/omeka-s/config
 
 # Set permissions
 RUN chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
@@ -101,9 +102,20 @@ RUN chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/file
 # Add entrypoint scripts
 # ==========================================================
 
-## todo: Bundle modules
+# download public key for github.com
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-## todo: Bundle themes
+
+RUN mkdir -p /scripts
+RUN rm -rf /scripts/*
+COPY --chmod=755 ./build/download_omeka_modules.sh /scripts
+COPY --chmod=755 ./build/download_omeka_themes.sh /scripts
+
+## Bundle modules
+RUN --mount=type=ssh /scripts/download_omeka_modules.sh $OMEKA_S_MODULES
+
+## Bundle themes
+RUN --mount=type=ssh /scripts/download_omeka_themes.sh $OMEKA_S_THEMES
 
 ## Add boot script to generate config (database.ini, local.config.php)
 COPY --chmod=755 ./build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh
@@ -115,4 +127,4 @@ COPY --chmod=755 ./build/download_omeka_modules.sh /entrypoint.d/60-download_ome
 COPY --chmod=755 ./build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh
 
 ## Add boot script to set file & folder permissions
-COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-download_omeka_themes.sh
+COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-set_omeka_permissions.sh
