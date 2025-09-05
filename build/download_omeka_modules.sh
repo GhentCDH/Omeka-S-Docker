@@ -21,7 +21,7 @@ fi
 
 # If no modules are specified, exit
 if [ ${#MODULE_LIST[@]} -eq 0 ]; then
-    echo "No Omeka S modules specified."
+    echo "No Omeka S modules specified to download."
 else
     # Download Omeka S modules
     echo "Downloading Omeka S modules ..."
