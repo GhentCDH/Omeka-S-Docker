@@ -56,8 +56,8 @@ The `database.ini` config file is automatically generated at startup based on th
 | ------------------------ | ------------------------------------------------------------------ | ------- |
 | OMEKA_S_MODULES          | A list of Omeka S modules/urls to download at boot time            |         |
 | OMEKA_S_THEMES           | A list of Omeka S themes/urls to download at boot time             |         |
-| OMEKA_S_INSTALL_CORE     | Install Omeka S core at boot time                                  | 1       |
-| OMEKA_S_INSTALL_MODULES  | Install modules at boot time                                       | 1       |
+| OMEKA_S_INSTALL_CORE     | Install Omeka S core at boot time                                  | 0       |
+| OMEKA_S_INSTALL_MODULES  | Install modules at boot time                                       | 0       |
 
 ## Download Modules at Startup
 
