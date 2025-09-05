@@ -3,6 +3,14 @@
 
 This repository provides a Docker setup for Omeka-S, utilizing Ubuntu, PHP, and Apache2. It is based on [webdevops/php-apache](https://github.com/webdevops/Dockerfile).
 
+## Features
+
+- Configurable Omeka & PHP version
+- Configurable list of modules and themes to be added to the build image
+- Install automation!
+  - Install Omeka S core at boot
+  - Install modules at boot
+
 ## Getting Started
 
 To start the container, run:
@@ -15,9 +23,9 @@ Once started, you can access the Omeka-S installation at [http://localhost:8080]
 
 ## Configuration
 
-### Setting Up Environment Variables for Omeka
-
 First, copy the `example.env` file to `.env` and update the values as needed.
+
+### Omeka configuration
 
 | Variable                 | Description                                                        | Default |
 | ------------------------ | ------------------------------------------------------------------ | ------- |
@@ -32,17 +40,24 @@ First, copy the `example.env` file to `.env` and update the values as needed.
 | SMTP_CONNECTION_TYPE     | 'null', 'ssl' or 'tls'                                             | none    |
 | SMTP_USER                |                                                                    |         |
 | SMTP_PASSWORD            |                                                                    |         |
-| OMEKA_S_MODULES          | A list of Omeka S modules/urls                                     |         |
-| OMEKA_S_THEMES           | A list of Omeka S themes/urls                                      |         |
 | OMEKA_S_ALLOW_EASY_ADMIN | Set value to 1 to allow EasyAdmin module to install themes/modules | 0       |
 
-These environment variables are used to set up the necessary configuration for the Omeka container. The `database.ini` config file is automatically generated at startup using the `init_omeka_config.sh` script based on these values.
+The `database.ini` config file is automatically generated at startup based on these values.
 
-#### Setting Up Environment Variables for database container (optional)
+### Database configuration (optional)
 
 | Variable            | Description                                                    | Default |
 | ------------------- | -------------------------------------------------------------- | ------- |
 | MYSQL_ROOT_PASSWORD | Database root password |         |
+
+### Install automation
+
+| Variable                 | Description                                                        | Default |
+| ------------------------ | ------------------------------------------------------------------ | ------- |
+| OMEKA_S_MODULES          | A list of Omeka S modules/urls to download at boot time            |         |
+| OMEKA_S_THEMES           | A list of Omeka S themes/urls to download at boot time             |         |
+| OMEKA_S_INSTALL_CORE     | Install Omeka S core at boot time                                  | 1       |
+| OMEKA_S_INSTALL_MODULES  | Install modules at boot time                                       | 1       |
 
 ## Download Modules at Startup
 

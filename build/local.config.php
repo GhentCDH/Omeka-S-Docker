@@ -13,9 +13,9 @@ return [
     ],
     'thumbnails' => [
         'types' => [
-            'large' => ['constraint' => 1000],
-            'medium' => ['constraint' => 600],
-            'square' => ['constraint' => 400],
+            'large' => ['constraint' => intval(getenv('THUMBNAIL_LARGE_CONSTRAINT') ?: 1000) ],
+            'medium' => ['constraint' => intval(getenv('THUMBNAIL_MEDIUM_CONSTRAINT') ?: 600) ],
+            'square' => ['constraint' => intval(getenv('THUMBNAIL_SQUARE_CONSTRAINT') ?: 400)],
         ],
         'thumbnailer_options' => [
             'imagemagick_dir' => null,
@@ -34,16 +34,16 @@ return [
         'transport' => [
             'type' => 'smtp',
             'options' => [
-                'name' => 'localhost',
-                'host' => getenv('EMAIL_HOST'), //'127.0.0.1'
-                'port' => getenv('EMAIL_PORT'), // 25, 465 for 'ssl', and 587 for 'tls'
+                'name' => 'smtp',
+                'host' => getenv('SMTP_HOST'), //'127.0.0.1'
+                'port' => getenv('SMTP_PORT'), // 25, 465 for 'ssl', and 587 for 'tls'
                 'connection_class' => 'smtp', // 'plain', 'login', or 'crammd5'
-                'connection_config' => [
-                    'username' => getenv('EMAIL_USER'),
-                    'password' => getenv('EMAIL_PASSWORD'),
-                    'ssl' => getenv('EMAIL_CONNECTION_TYPE'), // 'null', 'ssl' or 'tls'
+                'connection_config' => array_filter([
+                    'username' => getenv('SMTP_USER') ?: null,
+                    'password' => getenv('SMTP_PASSWORD') ?: null,
+                    'ssl' => getenv('SMTP_CONNECTION_TYPE') ?: null, // 'ssl' or 'tls'
                     'use_complete_quit' => true,
-                ],
+                ], fn($v) => $v !== null),
             ],
         ],
     ],

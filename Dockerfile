@@ -27,7 +27,7 @@ ENV php.opcache.validate_timestamps=1
 # ==========================================================
 
 # Install dependencies
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update && \
     apt-get -qq -f --no-install-recommends install \
         curl \
@@ -51,6 +51,9 @@ RUN a2dismod -f autoindex
 # Override default ImageMagick policy
 COPY ./build/imagemagick-policy.xml /etc/ImageMagick-6/policy.xml
 
+
+FROM base AS prod
+
 # Install Omeka S cli tool
 RUN curl -Lo /usr/local/bin/omeka-s-cli https://github.com/GhentCDH/Omeka-S-Cli/releases/latest/download/omeka-s-cli.phar && \
     chmod 755 /usr/local/bin/omeka-s-cli
@@ -60,6 +63,8 @@ RUN curl -Lo /usr/local/bin/omeka-s-cli https://github.com/GhentCDH/Omeka-S-Cli/
 # ==========================================================
 
 ARG OMEKA_S_VERSION="4.1.1"
+ARG OMEKA_S_MODULES=""
+ARG OMEKA_S_THEMES=""
 
 # Download Omeka S release
 # user "application" created by webdevops/php-apache
@@ -88,31 +93,48 @@ RUN rm -Rf /var/www/omeka-s/config && \
     ln -s /volume/logs /var/www/omeka-s/logs
 
 # Copy .htaccess
-COPY --chmod=755 ./build/prod/.htaccess /var/www/omeka-s/.htaccess
+COPY --chmod=755 ./build/.htaccess /var/www/omeka-s/.htaccess
 
 # Copy default configuration
-RUN mkdir /dist
-COPY --chmod=755 ./build/prod/local.config.php /var/www/omeka-s/config
+COPY --chmod=755 ./build/local.config.php /var/www/omeka-s/config
 
 # Set permissions
 RUN chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
 
-# ==========================================================
-# Add entrypoint scripts
-# ==========================================================
-
-## todo: Bundle modules
-
-## todo: Bundle themes
-
 ## Add boot script to generate config (database.ini, local.config.php)
 COPY --chmod=755 ./build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh
 
-## Add boot script to automatically download modules
+## Add boot script to set file & folder permissions
+COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-set_omeka_permissions.sh
+
+# ==========================================================
+# Download modules and themes
+# ==========================================================
+
+# Download public key for github.com (required for git repositories over ssh)
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# Add module & theme download scripts
+RUN mkdir -p /scripts
+RUN rm -rf /scripts/*
+COPY --chmod=755 ./build/download_omeka_modules.sh /scripts
+COPY --chmod=755 ./build/download_omeka_themes.sh /scripts
+
+## Download modules
+RUN --mount=type=ssh /scripts/download_omeka_modules.sh $OMEKA_S_MODULES
+
+## Download themes
+RUN --mount=type=ssh /scripts/download_omeka_themes.sh $OMEKA_S_THEMES
+
+# ==========================================================
+# Add entrypoint scripts to prepare omeka instance
+# ==========================================================
+
+## Add boot script to automatically download/install modules
 COPY --chmod=755 ./build/download_omeka_modules.sh /entrypoint.d/60-download_omeka_modules.sh
 
 ## Add boot script to automatically download themes
 COPY --chmod=755 ./build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh
 
-## Add boot script to set file & folder permissions
-COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-download_omeka_themes.sh
+## Add boot script to prepare omeka instance (install core, module install ...)
+COPY --chmod=755 ./build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh
