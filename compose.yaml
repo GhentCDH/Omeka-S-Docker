@@ -5,6 +5,7 @@ services:
       args:
         OMEKA_S_VERSION: ${OMEKA_S_VERSION:-"4.1.1"}
         PHP_VERSION: ${PHP_VERSION:-"8.2"}
+      target: prod
     restart: "no"
     env_file: ".env"
     ports:
@@ -42,6 +43,11 @@ services:
       - solr:/bitnami
     environment:
       - SOLR_CORES=omeka
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - ${MAILPIT_EXPOSED_PORT:-8025}:8025
 
 volumes:
   omeka:
