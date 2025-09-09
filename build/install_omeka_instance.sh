@@ -2,7 +2,7 @@
 # set -e
 # trap 'echo "An# error occurred. Exiting..."; exit 1;' ERR
 
-OSC="/src/omeka-s-cli/bin/omeka-s-cli"
+OSC="omeka-s-cli"
 
 # install omeka core?
 INSTALL_ARGS=""
