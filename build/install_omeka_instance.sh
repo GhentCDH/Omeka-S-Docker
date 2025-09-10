@@ -4,6 +4,27 @@
 
 OSC="omeka-s-cli"
 
+# Wait for database to be available
+wait_for_db() {
+    echo "Waiting for database to be ready..."
+    local max_attempts=30
+    local attempt=1
+    
+    while [ $attempt -le $max_attempts ]; do
+        if mysql -h"${MYSQL_HOST:-db}" -P"${MYSQL_PORT:-3306}" -u"${MYSQL_USER:-omeka}" -p"${MYSQL_PASSWORD:-omeka}" -e "SELECT 1;" >/dev/null 2>&1; then
+            echo "Database is ready!"
+            return 0
+        fi
+        echo "Database not ready, attempt $attempt/$max_attempts. Waiting 5 seconds..."
+        sleep 5
+        attempt=$((attempt + 1))
+    done
+    
+    echo "ERROR: Database failed to become ready after $max_attempts attempts"
+    exit 1
+}
+wait_for_db
+
 # install omeka core?
 INSTALL_ARGS=""
 if [ "${OMEKA_S_INSTALL_CORE:-0}" -eq "1" ]; then
