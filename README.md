@@ -28,7 +28,7 @@ The following build arguments can be used to customize the Docker image at build
 
 | Argument          | Description                                              | Default Value |
 | ----------------- | -------------------------------------------------------- | ------------- |
-| `PHP_VERSION`     | PHP Version                                              | `8.2`         |
+| `PHP_VERSION`     | PHP Version                                              | `8.1`         |
 | `OMEKA_S_VERSION` | Version of Omeka S to download and install               | `4.1.1`       |
 | `OMEKA_S_MODULES` | List of modules to download during build (examples below) | `""` (empty)  |
 | `OMEKA_S_THEMES`  | List of themes to download during build (examples below) | `""` (empty)  |
@@ -51,18 +51,19 @@ First, copy the `example.env` file to `.env` and update the values as needed.
 
 ### Omeka S
 
-| Variable                 | Description                                                        | Default      |
-| ------------------------ | ------------------------------------------------------------------ | ------------ |
-| `MYSQL_DATABASE`         | Database name                                                      | `omeka`      |
-| `MYSQL_USER`             | Database user                                                      | `omeka`      |
-| `MYSQL_PASSWORD`         | Database password                                                  | `omeka`      |
-| `MYSQL_HOST`             | Database host                                                      | `db`         |
-| `SMTP_HOST`              | SMTP host                                                          | `mailpit`    |
-| `SMTP_PORT`              | 25, 465 for 'ssl', and 587 for 'tls'                             | `8025`       |
-| `SMTP_CONNECTION_TYPE`   | 'null', 'ssl' or 'tls'                                           | `null`       |
-| `SMTP_USER`              |                                                                    | `""` (empty) |
-| `SMTP_PASSWORD`          |                                                                    | `""` (empty) |
-| `OMEKA_S_ALLOW_EASY_ADMIN` | Set value to 1 to allow EasyAdmin module to install themes/modules | `0`        |
+| Variable                   | Description                                                        | Default      |
+| -------------------------- | ------------------------------------------------------------------ | ------------ |
+| `MYSQL_DATABASE`           | Database name                                                      | `omeka`      |
+| `MYSQL_USER`               | Database user                                                      | `omeka`      |
+| `MYSQL_PASSWORD`           | Database password                                                  | `omeka`      |
+| `MYSQL_HOST`               | Database host                                                      | `db`         |
+| `MYSQL_PORT`               | Database port                                                      | `3306`       |
+| `SMTP_HOST`                | SMTP host                                                          | `mailpit`    |
+| `SMTP_PORT`                | 25, 465 for 'ssl', and 587 for 'tls'                               | `8025`       |
+| `SMTP_CONNECTION_TYPE`     | 'null', 'ssl' or 'tls'                                             | `null`       |
+| `SMTP_USER`                |                                                                    | `""` (empty) |
+| `SMTP_PASSWORD`            |                                                                    | `""` (empty) |
+| `OMEKA_S_ALLOW_EASY_ADMIN` | Set value to 1 to allow EasyAdmin module to install themes/modules | `0`          |
 
 The `database.ini` config file is automatically generated at startup based on these values.
 
