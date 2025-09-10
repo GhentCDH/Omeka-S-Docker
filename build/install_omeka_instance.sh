@@ -28,18 +28,22 @@ wait_for_db
 # install omeka core?
 INSTALL_ARGS=""
 if [ "${OMEKA_S_INSTALL_CORE:-0}" -eq "1" ]; then
+
     # check if core is installed
+    if $OSC core:status --base-path /var/www/omeka-s | grep -q "^installed"; then
+        echo "Omeka S core is already installed. Skipping installation."
+    else
+        # install core
+        echo "Installing Omeka S core ..."
+        INSTALL_ARGS="$INSTALL_ARGS --admin-name $(printf '%q' "${OMEKA_S_ADMIN_NAME:-admin}")"
+        INSTALL_ARGS="$INSTALL_ARGS --admin-email $(printf '%q' "${OMEKA_S_ADMIN_EMAIL:-admin@example.com}")"
+        INSTALL_ARGS="$INSTALL_ARGS --admin-password $(printf '%q' "${OMEKA_S_ADMIN_PASSWORD:-admin}")"
+        INSTALL_ARGS="$INSTALL_ARGS --title $(printf '%q' "${OMEKA_S_TITLE:-Omeka S}")"
+        INSTALL_ARGS="$INSTALL_ARGS --time-zone $(printf '%q' "${OMEKA_S_TIME_ZONE:-UTC}")"
+        INSTALL_ARGS="$INSTALL_ARGS --locale $(printf '%q' "${OMEKA_S_LOCALE:-en_US}")"
 
-    # install core
-    echo "Installing Omeka S core ..."
-    INSTALL_ARGS="$INSTALL_ARGS --admin-name $(printf '%q' "${OMEKA_S_ADMIN_NAME:-admin}")"
-    INSTALL_ARGS="$INSTALL_ARGS --admin-email $(printf '%q' "${OMEKA_S_ADMIN_EMAIL:-admin@example.com}")"
-    INSTALL_ARGS="$INSTALL_ARGS --admin-password $(printf '%q' "${OMEKA_S_ADMIN_PASSWORD:-admin}")"
-    INSTALL_ARGS="$INSTALL_ARGS --title $(printf '%q' "${OMEKA_S_TITLE:-Omeka S}")"
-    INSTALL_ARGS="$INSTALL_ARGS --time-zone $(printf '%q' "${OMEKA_S_TIME_ZONE:-UTC}")"
-    INSTALL_ARGS="$INSTALL_ARGS --locale $(printf '%q' "${OMEKA_S_LOCALE:-en_US}")"
-
-    $OSC core:install $INSTALL_ARGS --base-path /var/www/omeka-s
+        $OSC core:install $INSTALL_ARGS --base-path /var/www/omeka-s
+    fi
 fi
 
 # install omeka modules?
