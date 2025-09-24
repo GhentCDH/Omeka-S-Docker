@@ -3,8 +3,8 @@ services:
     build:
       context: .
       args:
-        OMEKA_S_VERSION: ${OMEKA_S_VERSION:-"4.1.1"}
-        PHP_VERSION: ${PHP_VERSION:-"8.2"}
+        OMEKA_S_VERSION: ${OMEKA_S_VERSION:-4.1.1}
+        PHP_VERSION: ${PHP_VERSION:-8.2}
       target: prod
     restart: "no"
     env_file: ".env"
