@@ -1,9 +1,10 @@
 name: Omeka-S Docker Image CI
 
 on:
-  release:
-    types: [ published ]
-  workflow_dispatch: # For being able to run the action manually
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: 
 
 jobs:
   build-and-push-docker-image:
@@ -38,7 +39,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/omeka-s-docker:php-v${{ matrix.php-version }}-omeka-s-v${{ matrix.omeka-s-version }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/omeka-s-docker:${{ matrix.omeka-s-version }}-php-${{ matrix.php-version }}
           build-args: |
             PHP_VERSION=${{ matrix.php-version }}
             OMEKA_S_VERSION=${{ matrix.omeka-s-version }}
