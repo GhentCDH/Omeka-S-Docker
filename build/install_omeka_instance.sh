@@ -35,14 +35,14 @@ if [ "${OMEKA_S_INSTALL_CORE:-0}" -eq "1" ]; then
     else
         # install core
         echo "Installing Omeka S core ..."
-        INSTALL_ARGS="$INSTALL_ARGS --admin-name $(printf '%q' "${OMEKA_S_ADMIN_NAME:-admin}")"
-        INSTALL_ARGS="$INSTALL_ARGS --admin-email $(printf '%q' "${OMEKA_S_ADMIN_EMAIL:-admin@example.com}")"
-        INSTALL_ARGS="$INSTALL_ARGS --admin-password $(printf '%q' "${OMEKA_S_ADMIN_PASSWORD:-admin}")"
-        INSTALL_ARGS="$INSTALL_ARGS --title $(printf '%q' "${OMEKA_S_TITLE:-Omeka S}")"
-        INSTALL_ARGS="$INSTALL_ARGS --time-zone $(printf '%q' "${OMEKA_S_TIME_ZONE:-UTC}")"
-        INSTALL_ARGS="$INSTALL_ARGS --locale $(printf '%q' "${OMEKA_S_LOCALE:-en_US}")"
-
-        $OSC core:install $INSTALL_ARGS --base-path /var/www/omeka-s
+        $OSC core:install \
+            --admin-name "${OMEKA_S_ADMIN_NAME:-admin}" \
+            --admin-email "${OMEKA_S_ADMIN_EMAIL:-admin@example.com}" \
+            --admin-password "${OMEKA_S_ADMIN_PASSWORD:-admin}" \
+            --title "${OMEKA_S_TITLE:-Omeka S}" \
+            --time-zone "${OMEKA_S_TIME_ZONE:-UTC}" \
+            --locale "${OMEKA_S_LOCALE:-en_US}" \
+            --base-path /var/www/omeka-s
     fi
 fi
 

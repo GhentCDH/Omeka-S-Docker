@@ -41,7 +41,7 @@ RUN apt-get -qq update && \
         git \
         default-mysql-client && \
     apt-get clean && \
-    apt-get autoclean
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add extra php dba extension
 RUN docker-php-ext-install dba
@@ -60,19 +60,17 @@ RUN curl -Lo /usr/local/bin/omeka-s-cli https://github.com/GhentCDH/Omeka-S-Cli/
     chmod 755 /usr/local/bin/omeka-s-cli
 
 # ==========================================================
-# Download Omeka S
+# Omeka S core
 # ==========================================================
 
 ARG OMEKA_S_VERSION="4.1.1"
-ARG OMEKA_S_MODULES=""
-ARG OMEKA_S_THEMES=""
+ARG OMEKA_S_MODULES
+ARG OMEKA_S_THEMES
 
 # Download Omeka S release
 # user "application" created by webdevops/php-apache
-RUN curl -Lo /var/www/omeka-s.zip "https://github.com/omeka/omeka-s/releases/download/v${OMEKA_S_VERSION}/omeka-s-${OMEKA_S_VERSION}.zip" && \
-    unzip -q /var/www/omeka-s.zip -d /var/www/ && \
-    rm /var/www/omeka-s.zip && \
-    rm -rf /var/www/html
+RUN mkdir -p /var/www/omeka-s && \
+    /usr/local/bin/omeka-s-cli core:download /var/www/omeka-s/ $OMEKA_S_VERSION
 
 # Create a single volume for config, files, themes, modules and logs
 RUN mkdir -p /volume/config && \
@@ -93,20 +91,25 @@ RUN rm -Rf /var/www/omeka-s/config && \
     rm -Rf /var/www/omeka-s/logs && \
     ln -s /volume/logs /var/www/omeka-s/logs
 
-# Copy .htaccess
-COPY --chmod=755 ./build/.htaccess /var/www/omeka-s/.htaccess
-
-# Copy default configuration
-COPY --chmod=755 ./build/local.config.php /var/www/omeka-s/config
-
 # Set permissions
 RUN chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
 
-## Add boot script to generate config (database.ini, local.config.php)
-COPY --chmod=755 ./build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh
-
-## Add boot script to set file & folder permissions
-COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-set_omeka_permissions.sh
+# Copy omeka s config and setup scripts
+COPY --chmod=755 ./build/ /tmp/build/
+RUN mv /tmp/build/.htaccess /var/www/omeka-s/ && \
+    mv /tmp/build/local.config.php /var/www/omeka-s/config && \
+    ## Add boot script to generate config (database.ini, local.config.php)
+    mv /tmp/build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh && \
+    ## Add boot script to automatically download/install modules
+    mv /tmp/build/download_omeka_modules.sh /entrypoint.d/60-download_omeka_modules.sh && \
+    ## Add boot script to automatically download themes
+    mv /tmp/build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh && \
+    ## Add boot script to set file & folder permissions
+    mv /tmp/build/set_omeka_permissions.sh /entrypoint.d/70-set_omeka_permissions.sh && \
+    ## Add boot script to prepare omeka instance (install core, module install ...)
+    mv /tmp/build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh && \
+    # cleanup
+    rm -rf /tmp/build
 
 # ==========================================================
 # Download modules and themes
@@ -116,8 +119,9 @@ COPY --chmod=755 ./build/set_omeka_permissions.sh /entrypoint.d/70-set_omeka_per
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 # Add module & theme download scripts
-RUN mkdir -p /scripts
-RUN rm -rf /scripts/*
+RUN mkdir -p /scripts && \
+    rm -rf /scripts/*
+
 COPY --chmod=755 ./build/download_omeka_modules.sh /scripts
 COPY --chmod=755 ./build/download_omeka_themes.sh /scripts
 
@@ -126,16 +130,3 @@ RUN --mount=type=ssh /scripts/download_omeka_modules.sh $OMEKA_S_MODULES
 
 ## Download themes
 RUN --mount=type=ssh /scripts/download_omeka_themes.sh $OMEKA_S_THEMES
-
-# ==========================================================
-# Add entrypoint scripts to prepare omeka instance
-# ==========================================================
-
-## Add boot script to automatically download/install modules
-COPY --chmod=755 ./build/download_omeka_modules.sh /entrypoint.d/60-download_omeka_modules.sh
-
-## Add boot script to automatically download themes
-COPY --chmod=755 ./build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh
-
-## Add boot script to prepare omeka instance (install core, module install ...)
-COPY --chmod=755 ./build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh
