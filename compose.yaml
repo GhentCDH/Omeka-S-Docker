@@ -38,12 +38,12 @@ services:
       - db
 
   solr:
-    image: bitnami/solr:${SOLR_VERSION:-9}
+    image: solr:${SOLR_VERSION:-9}
     volumes:
-      - solr:/bitnami
-    environment:
-      - SOLR_CORES=omeka
-
+      - solr:/var/solr
+    command:
+      - solr-precreate
+      - omeka
   mailpit:
     image: axllent/mailpit
     ports:
