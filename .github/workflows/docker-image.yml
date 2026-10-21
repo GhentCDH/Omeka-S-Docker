@@ -13,11 +13,29 @@ jobs:
     # set all the versions of php and omeka-s we will build an image of to push on docker hub
     strategy:
       matrix:
-        php-version: [8.1, 8.2, 8.3]
-        omeka-s-version: ["4.0.4", "4.1.0", "4.1.1"]
-        # to specify combinations please read include/exlude 
+        # explicit omeka-s / php combinations to build
         # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrixinclude
-        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategymatrixexclude
+        include:
+          - omeka-s-version: "4.0.4"
+            php-version: "8.2"
+          - omeka-s-version: "4.1.0"
+            php-version: "8.2"
+          - omeka-s-version: "4.1.0"
+            php-version: "8.3"
+          - omeka-s-version: "4.2.0"
+            php-version: "8.2"
+          - omeka-s-version: "4.2.0"
+            php-version: "8.3"
+          - omeka-s-version: "4.2.0"
+            php-version: "8.4"
+          - omeka-s-version: "4.2.1"
+            php-version: "8.2"
+          - omeka-s-version: "4.2.1"
+            php-version: "8.3"
+          - omeka-s-version: "4.2.1"
+            php-version: "8.4"
+          - omeka-s-version: "4.2.1"
+            php-version: "8.5"
         
     steps:
         # for access to repository (given to workflow)
