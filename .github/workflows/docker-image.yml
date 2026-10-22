@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
   # weekly rebuild to pick up PHP patch releases and OS security updates from the webdevops base image
   schedule:
     - cron: '0 4 * * 1'
@@ -63,6 +64,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
+          # always pull the latest base image and never reuse cached layers
+          pull: true
+          no-cache: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/omeka-s-docker:${{ matrix.omeka-s-version }}-php-${{ matrix.php-version }}
           build-args: |
             PHP_VERSION=${{ matrix.php-version }}
