@@ -4,7 +4,9 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: 
+  # weekly rebuild to pick up PHP patch releases and OS security updates from the webdevops base image
+  schedule:
+    - cron: '0 4 * * 1'
 
 jobs:
   build-and-push-docker-image:
