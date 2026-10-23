@@ -15,3 +15,7 @@ database.ini
 # exceptions to the rule
 !.gitkeep
 !data/db-init/.gitkeep
+
+
+.idea
+var/
