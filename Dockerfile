@@ -98,6 +98,8 @@ RUN chown -R application:application /volume/logs /volume/files
 # Copy omeka s config and setup scripts
 COPY --chmod=755 ./build/ /omeka/build/
 RUN mv /omeka/build/.htaccess /var/www/omeka-s/ && \
+    # Add apache security rules (hidden files, config, logs, code, direct php access)
+    install -m 644 /omeka/build/apache-security.conf /opt/docker/etc/httpd/conf.d/20-omeka-security.conf && \
     # Add boot script to generate config (database.ini, local.config.php, bootstrap.php)
     cp /omeka/build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh && \
     # Add boot script to automatically download/install modules

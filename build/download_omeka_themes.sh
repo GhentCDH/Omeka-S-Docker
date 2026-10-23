@@ -4,8 +4,10 @@ OSC="omeka-s-cli"
 
 ARGS=("$@")
 
-# Remove entrypoint.d from the arguments if it is the first argument
+# Remove entrypoint.d from the arguments if it is the first argument (sourced by the entrypoint at boot)
+IS_BOOT=0
 if [ ${#ARGS} -gt 0 ] && [ "$1" == "/entrypoint.d" ]; then
+    IS_BOOT=1
     unset 'ARGS[0]'
 fi
 
@@ -25,11 +27,18 @@ if [ ${#THEME_LIST[@]} -eq 0 ]; then
 else
     # Download Omeka S modules
     echo "Downloading Omeka S themes ..."
+    FAILED_THEMES=()
     for theme in ${THEME_LIST[@]}; do
         echo "Downloading theme: $theme"
         if [ -z "$theme" ]; then
             continue
         fi
-        $OSC theme:download $theme --base-path /var/www/omeka-s
+        $OSC theme:download $theme --base-path /var/www/omeka-s || FAILED_THEMES+=("$theme")
     done
+
+    # Fail the image build if a theme could not be downloaded; at boot, only report it
+    if [ ${#FAILED_THEMES[@]} -gt 0 ]; then
+        echo "Error: could not download theme(s): ${FAILED_THEMES[*]}" >&2
+        [ "$IS_BOOT" -eq 1 ] || exit 1
+    fi
 fi
