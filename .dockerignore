@@ -1,0 +1,12 @@
+# Only ./build is copied into the image; keep secrets, local data and tooling out of the build context
+.git
+.github
+.idea
+.env
+.env.*
+_temp
+data
+var
+docs
+compose*.yaml
+compose*.yml
