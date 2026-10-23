@@ -11,7 +11,8 @@ wait_for_db() {
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
-        if mysql -h"${MYSQL_HOST:-db}" -P"${MYSQL_PORT:-3306}" -u"${MYSQL_USER:-omeka}" -p"${MYSQL_PASSWORD:-omeka}" -e "SELECT 1;" >/dev/null 2>&1; then
+        # (without a connect timeout, mysql can hang forever on an unreachable host)
+        if mysql --connect-timeout=5 -h"${MYSQL_HOST:-db}" -P"${MYSQL_PORT:-3306}" -u"${MYSQL_USER:-omeka}" -p"${MYSQL_PASSWORD:-omeka}" -e "SELECT 1;" >/dev/null 2>&1; then
             echo "Database is ready!"
             return 0
         fi
