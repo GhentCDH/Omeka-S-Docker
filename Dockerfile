@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.1
+ARG PHP_VERSION=8.3
 
 FROM webdevops/php-apache:${PHP_VERSION} AS base
 
@@ -63,7 +63,7 @@ RUN curl -Lo /usr/local/bin/omeka-s-cli https://github.com/GhentCDH/Omeka-S-Cli/
 # Omeka S core
 # ==========================================================
 
-ARG OMEKA_S_VERSION="4.1.1"
+ARG OMEKA_S_VERSION="4.2.1"
 ARG OMEKA_S_MODULES
 ARG OMEKA_S_THEMES
 
@@ -92,24 +92,22 @@ RUN rm -Rf /var/www/omeka-s/config && \
     ln -s /volume/logs /var/www/omeka-s/logs
 
 # Set permissions
-RUN chown -R application:application /var/www/omeka-s/logs /var/www/omeka-s/files
+# (chown the volume folders, not the symlinks in /var/www/omeka-s)
+RUN chown -R application:application /volume/logs /volume/files
 
 # Copy omeka s config and setup scripts
-COPY --chmod=755 ./build/ /tmp/build/
-RUN mv /tmp/build/.htaccess /var/www/omeka-s/ && \
-    mv /tmp/build/local.config.php /var/www/omeka-s/config && \
-    ## Add boot script to generate config (database.ini, local.config.php)
-    mv /tmp/build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh && \
-    ## Add boot script to automatically download/install modules
-    mv /tmp/build/download_omeka_modules.sh /entrypoint.d/60-download_omeka_modules.sh && \
-    ## Add boot script to automatically download themes
-    mv /tmp/build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh && \
-    ## Add boot script to set file & folder permissions
-    mv /tmp/build/set_omeka_permissions.sh /entrypoint.d/70-set_omeka_permissions.sh && \
-    ## Add boot script to prepare omeka instance (install core, module install ...)
-    mv /tmp/build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh && \
-    # cleanup
-    rm -rf /tmp/build
+COPY --chmod=755 ./build/ /omeka/build/
+RUN mv /omeka/build/.htaccess /var/www/omeka-s/ && \
+    # Add boot script to generate config (database.ini, local.config.php, bootstrap.php)
+    cp /omeka/build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh && \
+    # Add boot script to automatically download/install modules
+    cp /omeka/build/download_omeka_modules.sh /entrypoint.d/60-download_omeka_modules.sh && \
+    # Add boot script to automatically download themes
+    cp /omeka/build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh && \
+    # Add boot script to prepare omeka instance (install core, module install ...)
+    cp /omeka/build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh && \
+    # Add boot script to check & fix file & folder permissions (last, also covers files created during install)
+    cp /omeka/build/set_omeka_permissions.sh /entrypoint.d/90-set_omeka_permissions.sh
 
 # ==========================================================
 # Download modules and themes
@@ -118,15 +116,8 @@ RUN mv /tmp/build/.htaccess /var/www/omeka-s/ && \
 # Download public key for github.com (required for git repositories over ssh)
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-# Add module & theme download scripts
-RUN mkdir -p /scripts && \
-    rm -rf /scripts/*
-
-COPY --chmod=755 ./build/download_omeka_modules.sh /scripts
-COPY --chmod=755 ./build/download_omeka_themes.sh /scripts
-
 ## Download modules
-RUN --mount=type=ssh /scripts/download_omeka_modules.sh $OMEKA_S_MODULES
+RUN --mount=type=ssh /omeka/build/download_omeka_modules.sh $OMEKA_S_MODULES
 
 ## Download themes
-RUN --mount=type=ssh /scripts/download_omeka_themes.sh $OMEKA_S_THEMES
+RUN --mount=type=ssh /omeka/build/download_omeka_themes.sh $OMEKA_S_THEMES
