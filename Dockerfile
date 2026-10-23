@@ -37,7 +37,7 @@ RUN apt-get -qq update && \
         ghostscript \
         ffmpeg \
         libvips-tools \
-        libxml2 libxml2-dev libcurl4-openssl-dev libmagickwand-dev \
+        libxml2 \
         git \
         default-mysql-client && \
     apt-get clean && \
