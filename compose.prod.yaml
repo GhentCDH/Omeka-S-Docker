@@ -1,0 +1,37 @@
+services:
+  omeka:
+    image: ghentcdh/omeka-s-docker:${OMEKA_S_VERSION:-4.2.1}-php-${PHP_VERSION:-8.3}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: "unless-stopped"
+    env_file: ".env"
+    ports:
+      - ${OMEKA_S_EXPOSED_PORT:-8080}:80
+    volumes:
+      - omeka-config:/volume/config
+      - omeka-files:/volume/files
+      - omeka-logs:/volume/logs
+      # remove modules and themes when they are included in a custom image
+      - omeka-modules:/volume/modules
+      - omeka-themes:/volume/themes
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:${MARIADB_VERSION:-11.4}
+    restart: "unless-stopped"
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+volumes:
+  omeka-config:
+  omeka-files:
+  omeka-logs:
+  omeka-modules:
+  omeka-themes:
+  db:
