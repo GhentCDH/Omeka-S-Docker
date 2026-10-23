@@ -47,27 +47,18 @@ if [ "${OMEKA_S_INSTALL_CORE:-0}" -eq "1" ]; then
     fi
 fi
 
-# install omeka modules?
+# Module failures are reported, but don't stop the container (this script is sourced by the entrypoint, which runs with errexit)
+
+# upgrade omeka modules? (before install, so new modules are installed against upgraded dependencies)
+if [ "${OMEKA_S_UPGRADE_MODULES:-0}" -eq "1" ]; then
+    echo "Upgrading Omeka S modules ..."
+    $OSC module:upgrade --all --base-path /var/www/omeka-s || echo "Warning: could not upgrade Omeka S modules" >&2
+fi
+
+# install omeka modules? (all downloaded modules: added to the image at build time or downloaded at boot)
 if [ "${OMEKA_S_INSTALL_MODULES:-0}" -eq "1" ]; then
-    # Get module list
-    MODULE_LIST=()
-    if [ -n "${OMEKA_S_MODULES:-}" ]; then
-        IFS=' ' read -ra MODULE_LIST <<< "$OMEKA_S_MODULES"
-    fi
-    # If no modules are specified, exit
-    if [ ${#MODULE_LIST[@]} -eq 0 ]; then
-        echo "No Omeka S modules specified to install."
-    else
-        # Download Omeka S modules
-        echo "Installing Omeka S modules ..."
-        for module in ${MODULE_LIST[@]}; do
-            echo "Installing module: $module"
-            if [ -z "$module" ]; then
-                continue
-            fi
-            $OSC module:install $module --base-path /var/www/omeka-s
-        done
-    fi
+    echo "Installing Omeka S modules ..."
+    $OSC module:install --all --base-path /var/www/omeka-s || echo "Warning: could not install Omeka S modules" >&2
 fi
 
 # todo: import resource templates
