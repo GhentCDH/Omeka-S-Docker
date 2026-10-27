@@ -67,16 +67,33 @@ What to persist:
 
 | Folder    | Base image | Custom image | Notes                                                                                       |
 | --------- | :--------: | :----------: | ------------------------------------------------------------------------------------------- |
-| `config`  |    yes     |     yes      | Keeps generated keys, such as `secret_key.php` of the Common module, and `local.config.php`. |
+| `config`  |    yes     |     yes      | Contains `database.ini`and `local.config.php`. |
 | `files`   |    yes     |     yes      | Uploaded media.                                                                             |
 | `logs`    |    yes     |     yes      |                                                                                             |
 | `modules` |    yes     |      no      | In a [custom image](#building-a-custom-image), the modules are part of the image.           |
-| `themes`  |    yes     |      no      | In a custom image, the themes are part of the image.                                        |
+| `themes`  |    yes     |      no      | In a [custom image](#building-a-custom-image), the themes are part of the image.                                        |
 
 - `database.ini` is created at every boot, based on the `MYSQL_*` environment variables. `local.config.php` is copied at boot when it doesn't exist, so you can customize it in the volume.
-- Modules can store files in `config`. The [Common](https://github.com/Daniel-KM/Omeka-S-module-Common) module, for example, generates `secret_key.php` to encrypt secrets (such as API keys) in the database. If `config` is not persisted, a new container can't decrypt those secrets anymore.
+- Modules can store files in `config`. The [Common](https://github.com/Daniel-KM/Omeka-S-module-Common) module, for example, uses `secret_key.php` to encrypt secrets (such as API keys) in the database. If `config` is not persisted, a new container can't decrypt those secrets anymore. `config` is not writable by PHP, so Common can't generate this file when it is installed: create `config/secret_key.php` yourself, or set the `OMEKA_SECRET_KEY` environment variable.
 - Don't mount `modules` or `themes` with a custom image: a bind mount hides the modules and themes of the image, and a named volume is only filled with the content of the image when it is created, so it keeps the old versions when you upgrade the image.
-- At boot, the ownership and permissions of the files in `/volume` are checked, and fixed if needed. `files` and `logs` are writable by PHP, `config` is not. `modules` and `themes` are only writable by PHP when `OMEKA_S_ALLOW_EASY_ADMIN=1`.
+
+### Permissions
+
+PHP runs as the user set in `CONTAINER_UID` (default `application`, uid 1000), Apache as `www-data`.
+
+- `files` and `logs` are writable by PHP. `config` is not. `modules` and `themes` are only writable by PHP when `OMEKA_S_ALLOW_EASY_ADMIN=1`.
+- At boot, folders in `/volume` that are missing or empty (e.g. a new volume) are created with the right owner. Folders with content are left alone: their ownership is up to you. When PHP can't write to `files` or `logs`, a warning is shown at boot.
+- Modules and themes are downloaded as root (as the PHP user when `OMEKA_S_ALLOW_EASY_ADMIN=1`), and installed as the PHP user, like an install from the admin interface.
+- Apache serves files, module and theme assets directly, so they must be readable by `www-data`.
+- Storage that you mount yourself must be writable for PHP. For a CIFS share, set the owner with the mount options, e.g. `uid=www-data,gid=www-data,file_mode=0644,dir_mode=0755` with `CONTAINER_UID=www-data`.
+
+To make existing data writable for PHP, e.g. after a migration, after changing `CONTAINER_UID`, or after setting `OMEKA_S_ALLOW_EASY_ADMIN=1` (add `/volume/modules /volume/themes`), run once:
+
+```sh
+docker compose exec omeka chown -R application:application /volume/files /volume/logs
+```
+
+Replace `application` with the value of `CONTAINER_UID`.
 
 ## Configuration
 
@@ -101,6 +118,7 @@ Copy the `example.env` file to `.env` and update the values as needed.
 | `THUMBNAIL_MEDIUM_CONSTRAINT` | Size of medium thumbnails (px)                                     | `600`         |
 | `THUMBNAIL_SQUARE_CONSTRAINT` | Size of square thumbnails (px)                                     | `400`         |
 | `OMEKA_S_ALLOW_EASY_ADMIN`    | Set value to 1 to allow EasyAdmin module to install themes/modules | `0`           |
+| `CONTAINER_UID`               | User PHP runs as: a name (e.g. `www-data`) or a number (e.g. your own uid). The group gets the same value. See [Permissions](#permissions). | `application` |
 
 ### Automated installation
 
@@ -191,12 +209,19 @@ docker compose exec omeka omeka-s-cli --help
 # core status and version
 docker compose exec -w /var/www/omeka-s omeka omeka-s-cli core:status
 
-# list, download, install and upgrade modules
+# list and download modules
 docker compose exec -w /var/www/omeka-s omeka omeka-s-cli module:list
 docker compose exec -w /var/www/omeka-s omeka omeka-s-cli module:download Common
-docker compose exec -w /var/www/omeka-s omeka omeka-s-cli module:install Common
-docker compose exec -w /var/www/omeka-s omeka omeka-s-cli module:upgrade --all
+
+# install and upgrade modules
+docker compose exec -u application -e HOME=/tmp -w /var/www/omeka-s omeka omeka-s-cli module:install Common
+docker compose exec -u application -e HOME=/tmp -w /var/www/omeka-s omeka omeka-s-cli module:upgrade --all
 ```
+
+Run omeka-s-cli as the same user as the boot scripts (see [Permissions](#permissions)), so new files get the right owner:
+
+- Download modules and themes as root, or as the PHP user when `OMEKA_S_ALLOW_EASY_ADMIN=1`.
+- Install and upgrade as the PHP user, like the admin interface does. Replace `application` with the value of `CONTAINER_UID`. `HOME` must be writable, because omeka-s-cli keeps its cache in `$HOME/.cache`.
 
 See the [omeka-s-cli documentation](https://github.com/GhentCDH/Omeka-S-Cli) for all commands.
 
