@@ -2,7 +2,11 @@
 # set -e
 # trap 'echo "An# error occurred. Exiting..."; exit 1;' ERR
 
-OSC="omeka-s-cli"
+# Run omeka-s-cli as the PHP user, as an install from the admin interface would:
+# files Omeka creates (logs, folders in files) get the right owner
+# (omeka-s-cli keeps its cache in $HOME/.cache, the PHP user has no writable home folder)
+PHP_USER="${CONTAINER_UID:-application}"
+OSC="gosu $PHP_USER:$PHP_USER env HOME=/tmp omeka-s-cli"
 
 # Wait for database to be available
 wait_for_db() {

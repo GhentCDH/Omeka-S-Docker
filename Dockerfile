@@ -91,15 +91,13 @@ RUN rm -Rf /var/www/omeka-s/config && \
     rm -Rf /var/www/omeka-s/logs && \
     ln -s /volume/logs /var/www/omeka-s/logs
 
-# Set permissions
-# (chown the volume folders, not the symlinks in /var/www/omeka-s)
-RUN chown -R application:application /volume/logs /volume/files
-
 # Copy omeka s config and setup scripts
 COPY --chmod=755 ./build/ /omeka/build/
 RUN mv /omeka/build/.htaccess /var/www/omeka-s/ && \
     # Add apache security rules (hidden files, config, logs, code, direct php access)
     install -m 644 /omeka/build/apache-security.conf /opt/docker/etc/httpd/conf.d/20-omeka-security.conf && \
+    # Add boot script to log the PHP and Apache users
+    cp /omeka/build/log_users.sh /entrypoint.d/10-log_users.sh && \
     # Add boot script to generate config (database.ini, local.config.php, bootstrap.php)
     cp /omeka/build/init_omeka_config.sh /entrypoint.d/50-init_omeka_config.sh && \
     # Add boot script to automatically download/install modules
@@ -107,9 +105,7 @@ RUN mv /omeka/build/.htaccess /var/www/omeka-s/ && \
     # Add boot script to automatically download themes
     cp /omeka/build/download_omeka_themes.sh /entrypoint.d/61-download_omeka_themes.sh && \
     # Add boot script to prepare omeka instance (install core, module install ...)
-    cp /omeka/build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh && \
-    # Add boot script to check & fix file & folder permissions (last, also covers files created during install)
-    cp /omeka/build/set_omeka_permissions.sh /entrypoint.d/90-set_omeka_permissions.sh
+    cp /omeka/build/install_omeka_instance.sh /entrypoint.d/80-install_omeka_instance.sh
 
 # ==========================================================
 # Download modules and themes
