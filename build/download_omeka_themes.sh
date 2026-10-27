@@ -11,6 +11,13 @@ if [ ${#ARGS} -gt 0 ] && [ "$1" == "/entrypoint.d" ]; then
     unset 'ARGS[0]'
 fi
 
+# At boot, download as the PHP user when themes can be managed from the admin interface, otherwise as root
+# (omeka-s-cli keeps its cache in $HOME/.cache, the PHP user has no writable home folder)
+if [ "$IS_BOOT" -eq 1 ] && [ "${OMEKA_S_ALLOW_EASY_ADMIN:-0}" -eq "1" ]; then
+    PHP_USER="${CONTAINER_UID:-application}"
+    OSC="gosu $PHP_USER:$PHP_USER env HOME=/tmp omeka-s-cli"
+fi
+
 # Check if any arguments are passed, if not, use the OMEKA_S_MODULES environment variable
 if [ ${#ARGS[@]} -gt 0 ]; then
     THEME_LIST=${ARGS[@]}
